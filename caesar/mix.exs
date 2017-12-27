@@ -4,8 +4,9 @@ defmodule Caesar.Mixfile do
   def project do
     [
       app: :caesar,
-      escript: escript_config,
+      escript: escript_config(),
       version: "0.1.0",
+      source_url: "https://github.com/emson/caesar",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
       deps: deps()
