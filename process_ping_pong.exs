@@ -13,22 +13,24 @@
 
 # Create PingPong module
 defmodule PingPong do
+    @game_finish 11
+
     def ready do
         receive do
-            {sender, action, 11} ->
+            {_sender, _action, @game_finish} ->
                 IO.puts "Game finished..."
-                ready
+                ready()
             {sender, action, turn} ->
                 hit_to(sender, switch(action), turn + 1)
-                ready
+                ready()
         after
-            1_000 -> IO.puts "timing out player #{inspect player_pid}"
+            1_000 -> IO.puts "timing out player #{inspect player_pid()}"
         end
     end
 
     def hit_to(opponent_id, action, turn) do
         IO.puts "#{turn}. hit_to #{inspect opponent_id} #{inspect action}"
-        send(opponent_id, {player_pid, action, turn})
+        send(opponent_id, {player_pid(), action, turn})
     end
 
     defp switch(action) do
@@ -38,7 +40,7 @@ defmodule PingPong do
         end
     end
 
-    defp player_pid, do: self
+    defp player_pid, do: self()
 end
 # Ready function to receive messages from other processes
 # Handle each message
@@ -46,9 +48,11 @@ end
 # Switch between ping/pong
 
 # 1. get main process PID
-player_1 = self
+player_1 = self()
 # 2. get spawned process PID
-player_2 = spawn(PingPong, :ready, [])
+# player_2 = spawn(PingPong, :ready, [])
+# player_2 = elem(Task.start(PingPong, :ready, []), 1)
+player_2 = PingPong |> Task.start(:ready, []) |> elem(1)
 # 3. inspect PID values
 IO.puts "player_1: #{inspect player_1}"
 IO.puts "player_2: #{inspect player_2}"
